@@ -1,9 +1,12 @@
-export const UserSchema = {
-    name: 'users',
+const UserSchema = {
+    name: 'User',
     properties: {
       _id: 'objectId?',
       name: 'string?',
-      password: 'string?'
+      task:"Task[]",
+      photo:"Photo[]"
     },
     primaryKey: '_id'
 };
+
+export default UserSchema

@@ -1,8 +1,8 @@
 import Realm from 'realm'
 
 // Configuration de la base de données
-export function getRealmApp() {
-   const appId = 'application-0-aieme' 
+export function GetApp() {
+   const appId = 'todolist-edrjw' 
    const appConfig = {
      id: appId,
      timeout: 10000,

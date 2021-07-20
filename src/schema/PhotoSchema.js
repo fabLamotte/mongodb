@@ -1,18 +1,17 @@
-const TaskSchema = {
-  name: "Task",
+const PhotoSchema = {
+  name: "Photo",
   properties: {
       _id: "objectId",
       _partition: "string",
-      name: "string",
-      description:"string",
-      status:"bool",
+      fileName: "string",
+      path:"string",
   },
   primaryKey: '_id',
   assignee: {
     type: 'linkingObject',
     objectType: 'User',
-    property: 'task',
+    property: 'photo',
   },
 }
 
-export default TaskSchema
+export default PhotoSchema

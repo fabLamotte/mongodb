@@ -1,120 +1,162 @@
-import React, {useEffect, useState} from 'react'
-import { StyleSheet, View, Text, TextInput, TouchableOpacity } from 'react-native'
+import React, {useContext} from 'react'
+import { StyleSheet, View, Text, TextInput, TouchableOpacity, ScrollView } from 'react-native'
+import {AuthContext} from './../context/AuthContext'
+import {Controller, useForm} from 'react-hook-form'
+import {yupResolver} from '@hookform/resolvers/yup'
+import * as yup from 'yup'
 
-const Inscription = () => {
+const schema = yup.object().shape({
+    email: yup
+      .string()
+      .email("L'email resnseigné n'est pas valide")
+      .required("L'email est requis"),
+    password: yup
+      .string()
+      .required()
+      .matches(
+        /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{6,}$/,
+        'Le mot de passe doit contenir au moins 6 caractères, une majuscule, une miniscule, un nombre et un caractère spécial',
+      ),
+  });
 
-    const [email, setEmail] = useState("")
-    const [password, setPassword] = useState("")
-    const [passwordConfirm, setPasswordConfirm] = useState("")
-    const [error, setError] = useState("")
+const Inscription = (props) => {
+    const {navigation} = props
+    const {signUp} = useContext(AuthContext)
+    const {
+        handleSubmit,
+        control,
+        formState: {errors},
+    } = useForm({
+        resolver: yupResolver(schema),
+    })
 
-    const inscription = (props) =>{
-        const {
-            navigation
-        } = props
-        if(email != '' && password != '' && passwordConfirm != ''){
-            if(password == passwordConfirm){
-                if(password.length > 6 && password < 128){
-                    const realm = await openRealmApp()
-                    const users = realm.objects("users")
-                    const isExist = users.filtered("name != " + email)
-                    if(!isExist){
-                        app.emailPasswordAuth.registerUser(email, password)
-                        navigation.navigate("Connexion")
-                    } else {
-                        setError("Email déjà utilisé")
-                    }
-                } else {
-                    setError("Votre mot de passe doit faire entre 6 et 128 caractères")
-                }
-            } else {
-                setError("Les mots de passes ne sont pas identiques")
-            }
-        } else {
-            setError("Il y a des champs vides")
-        }
-        // Connexion 
+    function registerUser(data) {
+        signUp(data)
     }
 
-    return (    
-        <View>
-            <Text style={styles.title}>
-                Inscription
-            </Text>
-            <View style={styles.bloc}>
-                <Text>Votre adresse de messagerie : </Text>
-                <TextInput 
-                    value={email}
-                    onChangeText={setEmail}
-                    style={styles.input}
+    return (
+        <View style={styles.container}>
+            <View style={styles.brandZone}>
+                <Text style={styles.brand}>BodyBuild</Text>
+            </View>
+            <Text style={styles.title}>Inscription</Text>
+            <View style={styles.input}>
+                <Controller
+                    control={control}
+                    render={({field: {onChange, onBlur, value}}) => (
+                    <TextInput
+                        label="Email"
+                        value={value}
+                        onBlur={onBlur}
+                        onChangeText={onChange}
+                        error={errors.password}
+                        keyboardType="email-address"
+                        placeholder="Adresse email"
+                    />
+                    )}
+                    name="email"
                 />
+                
+                {errors.email && (
+                    <Text>{errors.email?.message}</Text>
+                )}
             </View>
-            <View style={styles.bloc}>
-                <Text>Votre mot de passe : </Text>
-                <TextInput 
-                    value={password}
-                    onChangeText={setPassword}
-                    style={styles.input}
+            <View style={styles.input}>
+                <Controller
+                    control={control}
+                    render={({field: {onChange, onBlur, value}}) => (
+                    <TextInput
+                        value={value}
+                        onBlur={onBlur}
+                        onChangeText={onChange}
+                        error={errors.password}
+                        secureTextEntry={true}
+                        passwordRules="minlength: 20; required: lower; required: upper; required: digit; required: [-];"
+                        placeholder="Mot de passe"
+                    />
+                    )}
+                    name="password"
                 />
+                {errors.email && (
+                  <View>
+                    <Text>{errors.password?.message}</Text>
+                  </View>
+                )}
             </View>
-            <View style={styles.bloc}>
-                <Text>Répétez mot de passe : </Text>
-                <TextInput 
-                    value={passwordConfirm}
-                    onChangeText={setPasswordConfirm}
-                    style={styles.input}
+            <View style={styles.input}>
+                <Controller
+                    control={control}
+                    render={({field: {onChange, onBlur, value}}) => (
+                    <TextInput
+                        value={value}
+                        onBlur={onBlur}
+                        onChangeText={onChange}
+                        error={errors.password}
+                        secureTextEntry={true}
+                        passwordRules="minlength: 20; required: lower; required: upper; required: digit; required: [-];"
+                        placeholder="Répétez mot de passe"
+                    />
+                    )}
+                    name="password"
                 />
+                {errors.email && (
+                  <View>
+                    <Text>{errors.password?.message}</Text>
+                  </View>
+                )}
             </View>
-            <View style={styles.bloc}>
-                <TouchableOpacity style={styles.button} onPress={inscription}>
-                    <Text style={styles.titleButton}>Valider</Text>
-                </TouchableOpacity>
-            </View>
-            <View>
-                <Text style={styles.error}>{error?error:null}</Text>
-            </View>
+            <TouchableOpacity style={styles.button} onPress={handleSubmit(registerUser)}>
+                <Text style={styles.buttonTitle}>M'inscrire</Text>
+            </TouchableOpacity>
         </View>
     )
 }
 
-const styles= StyleSheet.create({
+const styles = StyleSheet.create({
     container:{
         flex:1,
+        backgroundColor:"#272727",
         justifyContent:'center',
         alignItems:'center'
     },
-    input:{
-        borderColor:'black',
-        borderWidth:1,
-        height:50,
-        width:400
+    brandZone:{
+        width:280,
+        borderBottomWidth: 100,
+        borderBottomColor: "#880C0C",
+        borderLeftWidth: 50,
+        borderLeftColor: "transparent",
+        borderRightWidth: 50,
+        borderRightColor: "transparent",
+        borderStyle: "solid",
+        justifyContent:'center',
+        alignItems:'center'
+    },
+    brand:{
+        color:'white',
+        fontSize:30,
+        fontWeight:'bold',
+        position:'absolute'
     },
     title:{
-        fontSize:50,
-        fontWeight:'bold',
-        textAlign:'center'
+        color:'white',
+        fontSize:18,
+        marginVertical:20
+    },
+    input:{
+        borderBottomWidth:3,
+        borderBottomColor:"#880C0C",
+        width:"80%",
+        backgroundColor:'grey',
+        marginVertical:15
     },
     button:{
-        backgroundColor:'green',
-        height:50,
-        width:'100%',
-        justifyContent:'center',
-        alignItems:'center'
+        backgroundColor:"#880C0C",
+        padding:15
     },
-    titleButton:{
+    buttonTitle:{
         color:'white',
-        fontWeight:'bold',
-        fontSize:20
-    },
-    bloc:{
-        textAlign:'center',
-        justifyContent:'center',
-        alignItems:'center',
-        marginVertical:10
-    },
-    error:{
-        color:'red',
         fontWeight:'bold'
     }
 })
+
 export default Inscription

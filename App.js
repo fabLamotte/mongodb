@@ -1,38 +1,30 @@
-import React, {useEffect, useState} from 'react'
+import React, {useEffect, useState, useReducer, useMemo} from 'react'
 import { StyleSheet, View, Text, TextInput, Button } from 'react-native'
-import openRealmApp from './src/database/OpenRealmApp'
-import {ObjectId} from 'bson'
-import { NavigationContainer } from '@react-navigation/native'
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
-import Connexion from './src/screens/Connexion'
-import Inscription from './src/screens/Inscription'
 
-const Tab = createBottomTabNavigator()
+import { AuthContext } from './src/context/AuthContext'
+import { GetActions } from './src/actions/AuthActions'
+import { Reducer } from './src/reducers/Reducer'
+import { GetApp } from './src/database/GetRealmApp'
+
+import RootNavigation from './src/navigations/RootNavigation'
 
 const App = () => {
-  // const valid = async() => {
-  //   const realm = await openRealmApp()
-  //   realm.write(() => {
-  //     const user = realm.create("users", {
-  //       _id: new ObjectId(),
-  //       name: "Fabien",
-  //     })
-  //   })
-  // }
+  
+  const [state, dispatch] = useReducer(Reducer, {
+    isLoading: true,
+    isSignout: false,
+    userId: null,
+  })
 
-  // useEffect(async() => {
-  //   const realm = await openRealmApp()
-  //   const usersContainer = realm.objects("users")
-  //   console.log(usersContainer)
-  // })
+  const authContext = useMemo(() => {
+    const app = GetApp()
+    return GetActions(app, dispatch)
+  }, [])
 
     return (
-      <NavigationContainer>
-        <Tab.Navigator initialRouteName="Connexion">
-          <Tab.Screen name="Connexion" component={Connexion} />
-          <Tab.Screen name="Inscription" component={Inscription} />
-        </Tab.Navigator>
-      </NavigationContainer>
+      <AuthContext.Provider value={authContext}>
+        <RootNavigation userId={state.userId} />
+      </AuthContext.Provider>
     )
   }
 

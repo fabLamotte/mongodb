@@ -1,39 +1,24 @@
 import Realm from 'realm'
-import { UserSchema } from '../schema/UserSchema'
-import { getRealmApp } from './GetReamlApp'
+import {TaskSchema, UserSchema, PhotoSchema} from './../schema/Index'
+import { GetApp } from './GetRealmApp'
 
-async function anonymousLogin() {
-    let user
-    try {
-      const app = getRealmApp() // pass in the appConfig variable that you created earlier
-      const credentials = Realm.Credentials.anonymous() // create an anonymous credential
-      user = await app.logIn(credentials)
-      return user
-    } catch (error) {
-      throw `Error logging in anonymously: ${JSON.stringify(error, null, 2)}`
+export default async function OpenRealm() {
+  let realm
+
+  const app = GetApp()
+
+  try {
+    const config = {
+      schema: [TaskSchema, UserSchema, PhotoSchema],
+      sync: {
+        user: app.currentUser,
+        partitionValue: '60e4b54151d68d396c60bb94',
+      },
     }
+    
+    realm = await Realm.open(config)
+    return realm
+  } catch (error) {
+    throw `Error opening realm: ${JSON.stringify(error, null, 2)}`
+  }
 }
-
-async function openRealm() {
-    let user
-    let realm
-    const app = getRealmApp();
-    try {
-        user = await anonymousLogin() // Appel de la fonction de login du dessus
-
-        // console.log(`Logged in with the user: ${user.identity}`)
-        const config = {
-            schema: [UserSchema],
-            sync: {
-                user: app.currentUser,
-                partitionValue: '60e417320478171d7bdd59f8',
-            },
-        }
-        
-        return realm = await Realm.open(config)
-    } catch (error) {
-        throw `Error opening realm: ${JSON.stringify(error, null, 2)}`
-    }
-}
-
-export default openRealm
